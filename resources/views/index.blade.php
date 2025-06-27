@@ -25,6 +25,14 @@
                   data-bs-target="#addNewStockModal">Baru</button>
               </div>
             </div>
+            <div class="d-flex justify-content-end align-items-center mb-3">
+              <select id="categoryFilter" class="form-select w-25">
+                <option value="">Semua Kategori</option>
+                <option value="Elektronik">Elektronik</option>
+                <option value="Buku">Buku</option>
+                <option value="Pakaian">Pakaian</option>
+              </select>
+            </div>
 
             <!-- Table with stripped rows -->
             <div class="table table-responsive">
@@ -33,6 +41,7 @@
                   <tr>
                     <th>No</th>
                     <th>Nama</th>
+                    {{-- <th>Kategori</th> --}}
                     <th>Kategori</th>
                     <th>Harga</th>
                     <th>Stok</th>
@@ -41,45 +50,34 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @if ($products->isNotEmpty())
-                    @foreach ($products as $product)
-                      <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $product->name }}</td>
-                        <td>{{ $product->category }}</td>
-                        <td>Rp. {{ round($product->price, 2) }}</td>
-                        <td>{{ $product->stock }}</td>
-                        <td class="text-center align-middle" style="padding: 0;">
-                          <span
-                            style="color:#219653; background-color: #e8f4ed; border-radius: 10px; padding: 3px 5px; display: inline-block; box-sizing: border-box">
-                            {{ \Carbon\Carbon::parse($product->created_at)->format('d-m-Y H:i:s') }}
-                          </span>
-                        </td>
-                        <td>
-                          <button type="button" class="btn btn-warning" id="btn-edit" data-edit-id="{{ $product->id }}"
-                            data-bs-toggle="modal" data-bs-target="#editStockModal"><i class="bi bi-pencil"></i></button>
-                          <form action="/products/{{ $product->id }}" method="POST" class="d-inline delete-form"
-                            id="deleteForm{{ $product->id }}">
-                            @method('DELETE')
-                            @csrf
-                            <button type="button" class="btn btn-danger"
-                              onclick="deleteConfirmation('{{ $product->id }}')">
-                              <i class="bi bi-trash"></i>
-                            </button>
-                          </form>
-                        </td>
-                      </tr>
-                    @endforeach
-                  @else
+                  @foreach ($products as $product)
                     <tr>
-                      <td colspan="7" class="text-center">No transactions found for the selected date range.</td>
+                      <td>{{ $loop->iteration }}</td>
+                      <td>{{ $product->name }}</td>
+                      <td>{{ $product->category }}</td>
+                      <td>Rp. {{ round($product->price, 2) }}</td>
+                      <td>{{ $product->stock }}</td>
+                      <td>{{ \Carbon\Carbon::parse($product->created_at)->format('d-m-Y H:i:s') }}</td>
+                      <td>
+                        <button type="button" class="btn btn-warning" id="btn-edit" data-edit-id="{{ $product->id }}"
+                          data-bs-toggle="modal" data-bs-target="#editStockModal"><i class="bi bi-pencil"></i></button>
+                        <form action="/products/{{ $product->id }}" method="POST" class="d-inline delete-form"
+                          id="deleteForm{{ $product->id }}">
+                          @method('DELETE')
+                          @csrf
+                          <button type="button" class="btn btn-danger"
+                            onclick="deleteConfirmation('{{ $product->id }}')">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </form>
+                      </td>
                     </tr>
-                  @endif
+                  @endforeach
                 </tbody>
               </table>
-              <div class="d-flex justify-content-center">
+              {{-- <div class="d-flex justify-content-center">
                 {{ $products->links() }}
-              </div>
+              </div> --}}
             </div>
           </div>
         </div>
@@ -227,6 +225,45 @@
 
   <script>
     $(document).ready(function() {
+      var table = $('#stock-table').DataTable({
+        scrollX: true,
+        columns: [{
+            data: 'no',
+            defaultContent: '<i>Not set</i>'
+          },
+          {
+            data: 'name',
+            defaultContent: '<i>Not set</i>'
+          },
+          {
+            data: 'category',
+            defaultContent: '<i>Not set</i>'
+          },
+          {
+            data: 'price',
+            defaultContent: '<i>Not set</i>'
+          },
+          {
+            data: 'stock',
+            defaultContent: '<i>Not set</i>'
+          },
+          {
+            data: 'created_at',
+            defaultContent: '<i>Not set</i>'
+          },
+          {
+            data: 'action',
+            defaultContent: '<i>Not set</i>'
+          },
+        ],
+      });
+
+      // Event listener untuk dropdown filter kategori
+      $('#categoryFilter').on('change', function() {
+        var selectedCategory = $(this).val();
+        table.column(2).search(selectedCategory).draw(); // Kolom ke-2 adalah kategori
+      });
+
       $('#addStockForm').on('submit', function(e) {
         e.preventDefault();
 
@@ -332,38 +369,6 @@
           },
           error: function(xhr) {
             alert('Gagal mengambil data product.');
-          }
-        });
-      });
-
-      $(document).on('click', '#btn-request-approval', function() {
-        var stockId = $(this).data('stock-id');
-        console.log("Request Approval for stock ID: " + stockId);
-
-        // Ambil data stock via AJAX
-        $.ajax({
-          url: '/getRequestData',
-          type: 'GET',
-          data: {
-            id: stockId
-          },
-          success: function(data) {
-            // $('#request-approval-id').val(data.id);
-            // $('#request-approval-id').attr('action', '/stock/' + data.id);
-            $('#requestApprovalForm input[name="stock_id"]').val(data.id);
-            $('#requestApprovalForm input[name="name"]').val(data.name);
-            // $('#requestApprovalForm input[name="amount"]').val(data.amount);
-            $('#btn-request-approval-').attr('id', 'btn-request-approval-' + data.id);
-
-            // Tampilkan modal edit
-            $('#requestApprovalModal').modal('show');
-            console.log("Data received for request approval:", data);
-
-            console.log("ID:", $('#request-approval-id').val());
-            console.log("Name:", $('#request-approval-name').val());
-          },
-          error: function(xhr) {
-            alert('Gagal mengambil data stock.');
           }
         });
       });
@@ -578,5 +583,50 @@
         }
       });
     };
+
+    // function filterByCategory(category) {
+    //   $.ajax({
+    //     url: '/products/select-by-category/' + category,
+    //     type: 'GET',
+    //     headers: {
+    //       'X-Requested-With': 'XMLHttpRequest'
+    //     },
+    //     success: function(response) {
+    //       if (response.success) {
+    //         $('#product-table-body').html(response.html);
+    //         $('#pagination-container').html(response.pagination);
+    //       } else {
+    //         alert('Gagal memfilter produk berdasarkan kategori.');
+    //       }
+    //     },
+    //     error: function(xhr) {
+    //       console.error('Error filtering by category:', xhr);
+    //       alert('Gagal mengambil data kategori.');
+    //     }
+    //   });
+    // }
+
+    // function searchCategory(query) {
+    //   $.ajax({
+    //     url: '/products/' + query, // Endpoint pencarian
+    //     type: 'GET',
+    //     headers: {
+    //       'X-Requested-With': 'XMLHttpRequest'
+    //     },
+    //     success: function(response) {
+    //       if (response.success) {
+    //         // Masukkan hasil pencarian ke dalam tabel
+    //         $('#stock-table tbody').html(response.html);
+    //         $('#pagination-container').html(response.pagination);
+    //       } else {
+    //         alert('Gagal mencari produk.');
+    //       }
+    //     },
+    //     error: function(xhr) {
+    //       console.error('Error searching products:', xhr);
+    //       alert('Gagal mencari produk.');
+    //     }
+    //   });
+    // }
   </script>
 @endsection

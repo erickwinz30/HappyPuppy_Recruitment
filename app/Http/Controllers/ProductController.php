@@ -16,10 +16,17 @@ class ProductController extends Controller
    */
   public function index()
   {
+    $productCategory = Product::select('category')
+      ->distinct()
+      ->get()
+      ->pluck('category');
+
+    Log::info('Product categories retrieved: ', $productCategory->toArray());
     $products = Product::latest()->paginate(10);
 
     return view('index', [
       'products' => $products,
+      'productCategory' => $productCategory,
     ]);
   }
 
@@ -181,6 +188,75 @@ class ProductController extends Controller
       Log::error('Error deleting stock: ' . $e->getMessage());
 
       return response()->json(['success' => false, 'message' => 'Gagal menghapus stock.'], 422);
+    }
+  }
+
+  public function searchCategory(Request $request, string $category)
+  {
+    try {
+      $products = Product::where('name', 'LIKE', '%' . $category . '%')->latest()->paginate(10);
+
+      Log::info('Products retrieved by search: ', ['search' => $category, 'count' => $products->count()]);
+
+      if ($request->ajax()) {
+        // Render partial view untuk tabel
+        $tableHtml = view('partials.product-table', [
+          'products' => $products
+        ])->render();
+
+        return response()->json([
+          'success' => true,
+          'html' => $tableHtml,
+          'pagination' => $products->links()->render(),
+        ]);
+      }
+
+      return view('index', [
+        'products' => $products,
+      ]);
+    } catch (\Exception $e) {
+      Log::error('Error searching products: ' . $e->getMessage());
+
+      return response()->json(['success' => false, 'message' => 'Gagal mencari produk.'], 500);
+    }
+  }
+
+  public function selectByCategory(Request $request, string $category)
+  {
+    try {
+      $products = Product::where('category', $category)->latest()->paginate(10);
+      $productCategory = Product::select('category')
+        ->distinct()
+        ->get()
+        ->pluck('category');
+
+      Log::info('Products retrieved by category: ', ['category' => $category, 'count' => $products->count()]);
+
+      if ($request->ajax()) {
+        return response()->json([
+          'success' => true,
+          'products' => $products->items(), // Ambil data produk saja
+          'pagination' => [
+            'current_page' => $products->currentPage(),
+            'last_page' => $products->lastPage(),
+            'per_page' => $products->perPage(),
+            'total' => $products->total(),
+            'from' => $products->firstItem(),
+            'to' => $products->lastItem(),
+          ],
+          'category' => $category
+        ]);
+      }
+
+      // Jika bukan AJAX request, return view biasa
+      return view('index', [
+        'products' => $products,
+        'productCategory' => $productCategory,
+      ]);
+    } catch (\Exception $e) {
+      Log::error('Error showing category: ' . $e->getMessage());
+
+      return redirect()->back()->with('error', 'Gagal menampilkan kategori produk.');
     }
   }
 }
