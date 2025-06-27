@@ -58,7 +58,7 @@
                         <td>
                           <button type="button" class="btn btn-warning" id="btn-edit" data-edit-id="{{ $product->id }}"
                             data-bs-toggle="modal" data-bs-target="#editStockModal"><i class="bi bi-pencil"></i></button>
-                          <form action="/product/{{ $product->id }}" method="POST" class="d-inline delete-form"
+                          <form action="/products/{{ $product->id }}" method="POST" class="d-inline delete-form"
                             id="deleteForm{{ $product->id }}">
                             @method('DELETE')
                             @csrf
@@ -76,20 +76,11 @@
                     </tr>
                   @endif
                 </tbody>
-                {{-- <tfoot>
-                  <tr>
-                    <th colspan="10" class="text-right">Total Penjualan:</th>
-                    <th id="totalHarga">Rp 0</th>
-                    <th colspan="1"></th>
-                  </tr>
-                </tfoot> --}}
               </table>
               <div class="d-flex justify-content-center">
                 {{ $products->links() }}
               </div>
             </div>
-            {{-- {{ $products->links() }} --}}
-            <!-- End Table with stripped rows -->
           </div>
         </div>
       </div>
@@ -222,21 +213,6 @@
                   </div>
                 @enderror
               </div>
-              {{-- <div class="mb-3">
-                <h6 class="card-text fw-semibold mt-3">Masuk/Keluar</h6>
-                <div class="d-flex justify-content-evenly align-items-center">
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="is_entry" id="is_admin_1" value="1" />
-                    <label class="form-check-label" for="is_admin_1">
-                      Masuk </label>
-                  </div>
-                  <div class="form-check ms-3">
-                    <input class="form-check-input" type="radio" name="is_entry" id="is_admin_2" value="0" />
-                    <label class="form-check-label" for="is_admin_2">
-                      Keluar </label>
-                  </div>
-                </div>
-              </div> --}}
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -515,9 +491,9 @@
       });
     }
 
-    function deleteConfirmation(stockId) {
+    function deleteConfirmation(productId) {
       Swal.fire({
-        title: "Yakin ingin menghapus data stock?",
+        title: "Yakin ingin menghapus data produk?",
         text: "Aksi ini tidak bisa mengembalikan data!",
         icon: "warning",
         showCancelButton: true,
@@ -526,10 +502,10 @@
         confirmButtonText: "Yes, delete it!"
       }).then((result) => {
         if (result.isConfirmed) {
-          console.log("Delete Confirmed. Trying to delete stock data...");
-          // document.getElementById('deleteForm' + stockId).submit();
-          // $(`#deleteForm${stockId}`).submit();
-          submitDeleteForm(stockId);
+          console.log("Delete Confirmed. Trying to delete product...");
+          // document.getElementById('deleteForm' + productId).submit();
+          // $(`#deleteForm${productId}`).submit();
+          submitDeleteForm(productId);
         }
       });
     }
@@ -564,105 +540,6 @@
           $('.pagetitle').after(alertHtml);
 
           // Refresh tabel stock (ambil ulang data via AJAX)
-          refreshStockTable();
-        },
-        error: function(xhr) {
-          // Hapus alert error sebelumnya jika ada
-          $('#dynamic-alert').remove();
-
-          // Ambil pesan error dari response
-          var message = 'Terjadi kesalahan.';
-          if (xhr.responseJSON && xhr.responseJSON.message) {
-            message = xhr.responseJSON.message;
-          } else if (xhr.responseJSON && xhr.responseJSON.errors) {
-            message = Object.values(xhr.responseJSON.errors).flat().join('<br>');
-          }
-
-          var alertHtml = `
-            <div class="row justify-content-center" id="dynamic-alert">
-              <div class="alert alert-danger alert-dismissible fade show col-lg-12 justify-content-center" role="alert">
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              </div>
-            </div>
-          `;
-          $('.pagetitle').after(alertHtml);
-
-          var errors = xhr.responseJSON && xhr.responseJSON.errors ? xhr.responseJSON.errors : null;
-          if (errors) {
-            if (errors.name) {
-              $('#name').addClass('is-invalid');
-              $('#name').next('.invalid-feedback').text(errors.name[0]);
-            }
-            if (errors.amount) {
-              $('#amount').addClass('is-invalid');
-              $('#amount').next('.invalid-feedback').text(errors.amount[0]);
-            }
-          }
-        }
-      });
-    };
-
-    function requestApprovalConfirmation() {
-      Swal.fire({
-        title: "Yakin ingin melakukan penambahan / pengurangan data stock?",
-        text: "Aksi ini akan diinformasikan ke admin untuk dilakukan konfirmasi!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#2980B9",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, request it!"
-      }).then((result) => {
-        if (result.isConfirmed) {
-          console.log("Requesting Approval Confirmed. Trying to request approval to admin...");
-          // document.getElementById('editStockForm').submit();
-          submitRequestApproval();
-        }
-      });
-    }
-
-    function submitRequestApproval() {
-      var form = $(`#requestApprovalForm`);
-      var url = form.attr('action');
-      var formData = form.serialize();
-
-      $.ajax({
-        url: url,
-        type: 'POST',
-        data: formData,
-        headers: {
-          'X-CSRF-TOKEN': '{{ csrf_token() }}',
-        },
-        success: function(response) {
-          console.log("Request Approval success");
-          $('#requestApprovalModal').modal('hide');
-          $('#requestApprovalForm')[0].reset();
-
-          setTimeout(function() {
-            $('.modal-backdrop').remove();
-            $('body').removeClass('modal-open');
-            $('body').css({
-              'overflow': '',
-              'padding-right': ''
-            });
-            $('#requestApprovalModal').removeClass('show').attr('aria-modal', null).css('display',
-              'none');
-          }, 500);
-
-          $('#dynamic-alert').remove();
-
-          var alertHtml = `
-          <div class="row justify-content-center" id="dynamic-alert">
-            <div class="alert alert-success alert-dismissible fade show col-lg-12 justify-content-center" role="alert">
-              ${response.message}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-          </div>
-        `;
-
-          // $('#dynamic-alert').remove();
-          $('.pagetitle').after(alertHtml);
-
           refreshStockTable();
         },
         error: function(xhr) {

@@ -165,8 +165,22 @@ class ProductController extends Controller
    * @param  \App\Models\Product  $product
    * @return \Illuminate\Http\Response
    */
-  public function destroy(Product $product)
+  public function destroy(Request $request, Product $product)
   {
-    //
+    try {
+      Log::info('Trying to delete stock.');
+      $product->delete();
+      Log::info('Product deleted: ', ['id' => $product->id, 'name' => $product->name]);
+
+      if ($request->ajax()) {
+        return response()->json(['success' => true, 'message' => 'Stock berhasil dihapus!']);
+      }
+
+      return response()->json(['success' => true, 'message' => 'Stock berhasil dihapus!']);
+    } catch (\Exception $e) {
+      Log::error('Error deleting stock: ' . $e->getMessage());
+
+      return response()->json(['success' => false, 'message' => 'Gagal menghapus stock.'], 422);
+    }
   }
 }
