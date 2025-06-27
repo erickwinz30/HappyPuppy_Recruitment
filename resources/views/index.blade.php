@@ -20,12 +20,10 @@
               <div>
                 <h5 class="card-title">Stock</h5>
               </div>
-              @if (auth()->user()->is_admin)
-                <div>
-                  <button type="button" class="btn btn-success" data-bs-toggle="modal"
-                    data-bs-target="#addNewStockModal">Baru</button>
-                </div>
-              @endif
+              <div>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                  data-bs-target="#addNewStockModal">Baru</button>
+              </div>
             </div>
 
             <!-- Table with stripped rows -->
@@ -97,48 +95,69 @@
       </div>
     </div>
 
-    @if (auth()->user()->is_admin)
-      <!-- Create Modal -->
-      <div class="modal fade" id="addNewStockModal" tabindex="-1" aria-labelledby="newStockLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">Tambah Barang Baru</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="/stock" method="post" id="addStockForm">
-              <div class="modal-body">
-                <div class="mb-3">
-                  <label for="name" class="form-label @error('name') is-invalid @enderror">Nama
-                    Barang Baru</label>
-                  <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}"
-                    required autofocus>
-                  @error('name')
-                    <div class="invalid-feedback">
-                      {{ $message }}
-                    </div>
-                  @enderror
-                </div>
-                <div class="mb-3">
-                  <label for="amount" class="form-label">Jumlah Barang</label>
-                  <input type="text" inputmode="numeric" class="form-control" id="amount" name="amount"
-                    value="{{ old('amount') }}" required autofocus>
-                  @error('amount')
-                    <div class="invalid-feedback">
-                      {{ $message }}
-                    </div>
-                  @enderror
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Save changes</button>
-              </div>
-            </form>
+    <!-- Create Modal -->
+    <div class="modal fade" id="addNewStockModal" tabindex="-1" aria-labelledby="newStockLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Tambah Produk Baru</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
+          <form action="/products" method="post" id="addStockForm">
+            <div class="modal-body">
+              <div class="mb-3">
+                <label for="name" class="form-label @error('name') is-invalid @enderror">Nama
+                  Product Baru</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}"
+                  required autofocus>
+                @error('name')
+                  <div class="invalid-feedback">
+                    {{ $message }}
+                  </div>
+                @enderror
+              </div>
+              <div class="mb-3">
+                <label for="price" class="form-label">Kategori Produk</label>
+                <select class="form-select" name="category" aria-label="Default select example">
+                  <option selected>Open this select menu</option>
+                  <option value="Elektronik">Elektronik</option>
+                  <option value="Buku">Buku</option>
+                  <option value="Pakaian">Pakaian</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="price" class="form-label">Harga</label>
+                <div class="input-group">
+                  <span class="input-group-text flex-nowrap" id="addon-wrapping"
+                    style="border-radius: 5px 0 0 5px">Rp.</span>
+                  <input type="text" inputmode="numeric" class="form-control" id="price" name="price"
+                    value="{{ old('price') }}" required autofocus>
+                  @error('price')
+                    <div class="invalid-feedback">
+                      {{ $message }}
+                    </div>
+                  @enderror
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="stock" class="form-label">Jumlah Produk</label>
+                <input type="text" inputmode="numeric" class="form-control" id="stock" name="stock"
+                  value="{{ old('stock') }}" required autofocus>
+                @error('stock')
+                  <div class="invalid-feedback">
+                    {{ $message }}
+                  </div>
+                @enderror
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+          </form>
         </div>
       </div>
-    @endif
+    </div>
 
     @if (auth()->user()->is_admin)
       <!-- Edit Modal -->

@@ -14,6 +14,13 @@ class Product extends Model
   protected $guarded = ['id'];
   protected $keyType = 'string';
 
+  protected $fillable = [
+    'name',
+    'category',
+    'price',
+    'stock',
+  ];
+
   protected static function boot()
   {
     parent::boot();

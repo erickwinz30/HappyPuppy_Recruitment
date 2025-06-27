@@ -13,7 +13,7 @@
       rel="stylesheet">
 
     <!-- Favicons -->
-    <link href="{{ asset('img/pas_logo.jpg') }}" rel="icon">
+    <link href="{{ asset('img/hp_logo.png') }}" rel="icon">
 
     <!-- JQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
