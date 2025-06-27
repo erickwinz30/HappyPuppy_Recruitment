@@ -102,7 +102,15 @@ class ProductController extends Controller
    */
   public function edit(Product $product)
   {
-    //
+    Log::info('Trying to edit stock: ', ['id' => $product->id, 'name' => $product->name, 'category' => $product->category, 'price' => $product->price, 'stock' => $product->stock]);
+
+    return response()->json([
+      'id' => $product->id,
+      'name' => $product->name,
+      'category' => $product->category,
+      'price' => $product->price,
+      'stock' => $product->stock,
+    ]);
   }
 
   /**
@@ -114,7 +122,41 @@ class ProductController extends Controller
    */
   public function update(Request $request, Product $product)
   {
-    //
+    try {
+      $rules = [];
+
+      if ($request->name !== $product->name) {
+        $rules['name'] = 'required|string|max:255';
+      }
+
+      if ($request->category !== $product->category) {
+        $rules['category'] = 'required|string|max:255';
+      }
+
+      if ($request->price !== $product->price) {
+        $rules['price'] = 'required|integer|min:1';
+      }
+
+      if ($request->stock !== $product->stock) {
+        $rules['stock'] = 'required|integer|min:1';
+      }
+
+      $validatedData = $request->validate($rules);
+      $product->update($validatedData);
+
+      Log::info('Product updated with data: ', $product->toArray());
+      if ($request->ajax()) {
+        return response()->json(['success' => true, 'message' => 'Produk berhasil diupdate!']);
+      }
+    } catch (\Exception $e) {
+      Log::error('Error updating produk: ' . $e->getMessage());
+
+      if ($request->ajax()) {
+        return response()->json(['success' => false, 'message' => 'Gagal memperbarui produk.'], 422);
+      }
+
+      return redirect()->back()->with('error', 'Gagal memperbarui produk.');
+    }
   }
 
   /**

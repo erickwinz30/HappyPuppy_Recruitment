@@ -159,42 +159,70 @@
       </div>
     </div>
 
-    @if (auth()->user()->is_admin)
-      <!-- Edit Modal -->
-      <div class="modal fade" id="editStockModal" tabindex="-1" aria-labelledby="editStockLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Stock Barang</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="/stock/" method="post" id="editStockForm">
-              @csrf
-              @method('PUT')
-              <div class="modal-body">
-                <input type="text" class="form-control" id="edit-id" name="id" required hidden>
-                <div class="mb-3">
-                  <label for="name" class="form-label @error('name') is-invalid @enderror">Nama
-                    Barang</label>
-                  <input type="text" class="form-control" id="edit-name" name="name" required>
-                  @error('name')
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editStockModal" tabindex="-1" aria-labelledby="editStockLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Produk</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form action="/products/" method="post" id="editStockForm">
+            @csrf
+            @method('PUT')
+            <div class="modal-body">
+              <input type="text" class="form-control" id="edit-id" name="id" required hidden>
+              <div class="mb-3">
+                <label for="name" class="form-label @error('name') is-invalid @enderror">Nama
+                  Produk</label>
+                <input type="text" class="form-control" id="edit-name" name="name" required>
+                @error('name')
+                  <div class="invalid-feedback">
+                    {{ $message }}
+                  </div>
+                @enderror
+              </div>
+              <div class="mb-3">
+                <label for="edit-category" class="form-label @error('category') is-invalid @enderror">Kategori
+                  Produk</label>
+                <select class="form-select" name="category" aria-label="Default select example">
+                  <option selected>Open this select menu</option>
+                  <option value="Elektronik">Elektronik</option>
+                  <option value="Buku">Buku</option>
+                  <option value="Pakaian">Pakaian</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="edit-price" class="form-label @error('price') is-invalid @enderror">Harga</label>
+                <div class="input-group">
+                  <span class="input-group-text flex-nowrap" id="addon-wrapping"
+                    style="border-radius: 5px 0 0 5px">Rp.</span>
+                  <input type="text" inputmode="numeric" class="form-control" id="edit-price" name="price"
+                    value="{{ old('price') }}" required autofocus>
+                  @error('price')
                     <div class="invalid-feedback">
                       {{ $message }}
                     </div>
                   @enderror
                 </div>
-                <div class="mb-3">
-                  <label for="edit-amount" class="form-label @error('amount') is-invalid @enderror">Jumlah
-                    Barang</label>
-                  <input type="text" inputmode="numeric" class="form-control" id="edit-amount" name="amount"
-                    required>
-                  @error('name')
-                    <div class="invalid-feedback">
-                      {{ $message }}
-                    </div>
-                  @enderror
-                </div>
-                {{-- <div class="mb-3">
+                @error('price')
+                  <div class="invalid-feedback">
+                    {{ $message }}
+                  </div>
+                @enderror
+              </div>
+              <div class="mb-3">
+                <label for="edit-stock" class="form-label @error('stock') is-invalid @enderror">Jumlah
+                  Produk</label>
+                <input type="text" inputmode="numeric" class="form-control" id="edit-stock" name="stock"
+                  required>
+                @error('stock')
+                  <div class="invalid-feedback">
+                    {{ $message }}
+                  </div>
+                @enderror
+              </div>
+              {{-- <div class="mb-3">
                 <h6 class="card-text fw-semibold mt-3">Masuk/Keluar</h6>
                 <div class="d-flex justify-content-evenly align-items-center">
                   <div class="form-check">
@@ -209,77 +237,11 @@
                   </div>
                 </div>
               </div> --}}
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="btn-update-"
-                  onclick="editConfirmation()">Update</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    @endif
-
-
-    <!-- Request Modal -->
-    <div class="modal fade" id="requestApprovalModal" tabindex="-1" aria-labelledby="requestApprovalLabel"
-      aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h1 class="modal-title fs-5" id="requestApprovalLabel">Barang Masuk / Keluar</h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <form action="/requestApproval" method="post" id="requestApprovalForm">
-            @csrf
-            <div class="modal-body">
-              <input type="text" class="form-control" id="request-approval-id" name="stock_id" required hidden>
-              <div class="mb-3">
-                <label for="request-approval-name"
-                  class="form-label @error('request-approval-name') is-invalid @enderror">Nama
-                  Barang</label>
-                <input type="text" class="form-control" id="request-approval-name" name="name" disabled
-                  required>
-                @error('request-approval-name')
-                  <div class="invalid-feedback">
-                    {{ $message }}
-                  </div>
-                @enderror
-              </div>
-              <div class="mb-3">
-                <label for="request-approval-amount" class="form-label @error('amount') is-invalid @enderror">Jumlah
-                  Barang</label>
-                <input type="text" inputmode="numeric" class="form-control" id="request-approval-amount"
-                  name="amount" required>
-                @error('name')
-                  <div class="invalid-feedback">
-                    {{ $message }}
-                  </div>
-                @enderror
-              </div>
-              <div class="mb-3">
-                <h6 class="card-text fw-semibold mt-3">Barang Masuk/Keluar</h6>
-                <div class="d-flex justify-content-evenly align-items-center">
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="is_entry" id="request-approval-entry"
-                      value="1" />
-                    <label class="form-check-label" for="request-approval-entry">
-                      Masuk </label>
-                  </div>
-                  <div class="form-check ms-3">
-                    <input class="form-check-input" type="radio" name="is_entry" id="request-approval-outgoing"
-                      value="0" />
-                    <label class="form-check-label" for="request-approval-outgoing">
-                      Keluar </label>
-                  </div>
-                </div>
-              </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary" id="btn-request-approval-"
-                onclick="requestApprovalConfirmation()">Request</button>
+              <button type="button" class="btn btn-primary" id="btn-update-"
+                onclick="editConfirmation()">Update</button>
             </div>
           </form>
         </div>
@@ -373,19 +335,19 @@
       });
 
       $(document).on('click', '#btn-edit', function() {
-        var stockId = $(this).data('edit-id');
+        var productId = $(this).data('edit-id');
 
         // Ambil data stock via AJAX
         $.ajax({
-          url: '/stock/' + stockId + '/edit',
+          url: '/products/' + productId + '/edit',
           type: 'GET',
           success: function(data) {
             $('#edit-id').val(data.id);
-            $('#editStockForm').attr('action', '/stock/' + data.id);
+            $('#editStockForm').attr('action', '/products/' + data.id);
             $('#editStockForm input[name="id"]').val(data.id);
             $('#editStockForm input[name="name"]').val(data.name);
-            $('#editStockForm input[name="category"]').val(data.category);
-            $('#editStockForm input[name="price"]').val(data.price);
+            $('#editStockForm select[name="category"]').val(data.category).trigger('change');
+            $('#editStockForm input[name="price"]').val(Math.round(data.price));
             $('#editStockForm input[name="stock"]').val(data.stock);
             $('#btn-update-').attr('id', 'btn-update-' + data.id);
 
@@ -438,7 +400,7 @@
 
     function refreshStockTable() {
       $.ajax({
-        url: '/stock', // Pastikan route ini mengembalikan partial view atau JSON data
+        url: '/products', // Pastikan route ini mengembalikan partial view atau JSON data
         type: 'GET',
         dataType: 'html',
         success: function(data) {

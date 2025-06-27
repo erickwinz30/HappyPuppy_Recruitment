@@ -3,8 +3,8 @@
 
   <div class="d-flex align-items-center justify-content-between">
     <a href="/stock" class="logo d-flex align-items-center">
-      <img src="{{ asset('img/pas_logo.jpg') }}" alt="Kenzou Logo">
-      <span class="d-none d-lg-block fs-5">Prakarsa Alam Segar</span>
+      <img src="{{ asset('img/hp_logo.png') }}" alt="Happy Puppy">
+      {{-- <span class="d-none d-lg-block fs-5">Prakarsa Alam Segar</span> --}}
     </a>
     <i class="bi bi-list toggle-sidebar-btn"></i>
   </div><!-- End Logo -->

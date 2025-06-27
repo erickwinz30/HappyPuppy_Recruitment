@@ -10,7 +10,7 @@
     <meta content="" name="keywords">
 
     <!-- Favicons -->
-    <link href="{{ asset('img/pas_logo.jpg') }}" rel="icon">
+    <link href="{{ asset('img/hp_logo.png') }}" rel="icon">
     {{-- <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon"> --}}
 
     <!-- Google Fonts -->
@@ -70,8 +70,7 @@
 
                 <div class="d-flex justify-content-center py-4">
                   <a href="index.html" class="logo d-flex align-items-center w-auto">
-                    <img src="{{ asset('img/pas_logo.jpg') }}" alt="pas_logo" style="max-height: 5em">
-                    <span class="d-none d-lg-block text-center">PT. Prakarsa Alam Segar</span>
+                    <img src="{{ asset('img/hp_logo.png') }}" alt="pas_logo" style="max-height: 5em">
                   </a>
                 </div><!-- End Logo -->
 
