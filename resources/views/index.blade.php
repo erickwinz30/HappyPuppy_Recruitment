@@ -49,7 +49,7 @@
                     <th>Aksi</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody id="product-table-body">
                   @foreach ($products as $product)
                     <tr>
                       <td>{{ $loop->iteration }}</td>
@@ -75,9 +75,9 @@
                   @endforeach
                 </tbody>
               </table>
-              {{-- <div class="d-flex justify-content-center">
+              <div class="d-flex justify-content-center">
                 {{ $products->links() }}
-              </div> --}}
+              </div>
             </div>
           </div>
         </div>
@@ -225,44 +225,44 @@
 
   <script>
     $(document).ready(function() {
-      var table = $('#stock-table').DataTable({
-        scrollX: true,
-        columns: [{
-            data: 'no',
-            defaultContent: '<i>Not set</i>'
-          },
-          {
-            data: 'name',
-            defaultContent: '<i>Not set</i>'
-          },
-          {
-            data: 'category',
-            defaultContent: '<i>Not set</i>'
-          },
-          {
-            data: 'price',
-            defaultContent: '<i>Not set</i>'
-          },
-          {
-            data: 'stock',
-            defaultContent: '<i>Not set</i>'
-          },
-          {
-            data: 'created_at',
-            defaultContent: '<i>Not set</i>'
-          },
-          {
-            data: 'action',
-            defaultContent: '<i>Not set</i>'
-          },
-        ],
-      });
+      // var table = $('#stock-table').DataTable({
+      //   scrollX: true,
+      //   columns: [{
+      //       data: 'no',
+      //       defaultContent: '<i>Not set</i>'
+      //     },
+      //     {
+      //       data: 'name',
+      //       defaultContent: '<i>Not set</i>'
+      //     },
+      //     {
+      //       data: 'category',
+      //       defaultContent: '<i>Not set</i>'
+      //     },
+      //     {
+      //       data: 'price',
+      //       defaultContent: '<i>Not set</i>'
+      //     },
+      //     {
+      //       data: 'stock',
+      //       defaultContent: '<i>Not set</i>'
+      //     },
+      //     {
+      //       data: 'created_at',
+      //       defaultContent: '<i>Not set</i>'
+      //     },
+      //     {
+      //       data: 'action',
+      //       defaultContent: '<i>Not set</i>'
+      //     },
+      //   ],
+      // });
 
       // Event listener untuk dropdown filter kategori
-      $('#categoryFilter').on('change', function() {
-        var selectedCategory = $(this).val();
-        table.column(2).search(selectedCategory).draw(); // Kolom ke-2 adalah kategori
-      });
+      // $('#categoryFilter').on('change', function() {
+      //   var selectedCategory = $(this).val();
+      //   table.column(2).search(selectedCategory).draw(); // Kolom ke-2 adalah kategori
+      // });
 
       $('#addStockForm').on('submit', function(e) {
         e.preventDefault();
@@ -373,10 +373,64 @@
         });
       });
 
-      // Reset button functionality (updated)
-      // $('#tombolReset').on('click', function() {
-      //   table.search('').columns().search('').draw();
-      // });
+      $('#categoryFilter').on('change', function() {
+        var selectedCategory = $(this).val(); // Ambil kategori yang dipilih
+
+        if (selectedCategory) {
+          $.ajax({
+            url: '/products/select-by-category/' + selectedCategory, // Route untuk fetching data
+            type: 'GET',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+              if (response.success) {
+                // Kosongkan tabel
+                $('#stock-table tbody').empty();
+
+                // Bangun isi tabel dari data produk
+                response.products.forEach(function(product, index) {
+                  var row = `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${product.name}</td>
+                  <td>${product.category}</td>
+                  <td>Rp. ${parseFloat(product.price).toFixed(2)}</td>
+                  <td>${product.stock}</td>
+                  <td>${new Date(product.created_at).toLocaleString()}</td>
+                  <td>
+                    <button type="button" class="btn btn-warning" id="btn-edit" data-edit-id="${product.id}" data-bs-toggle="modal" data-bs-target="#editStockModal">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <form action="/products/${product.id}" method="POST" class="d-inline delete-form" id="deleteForm${product.id}">
+                      @method('DELETE')
+                      @csrf
+                      <button type="button" class="btn btn-danger" onclick="deleteConfirmation('${product.id}')">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              `;
+                  $('#stock-table tbody').append(row);
+                });
+
+                // Update pagination
+                $('#pagination-container').html(response.pagination);
+              } else {
+                alert('Gagal memfilter produk berdasarkan kategori.');
+              }
+            },
+            error: function(xhr) {
+              console.error('Error filtering by category:', xhr);
+              alert('Gagal mengambil data kategori.');
+            }
+          });
+        } else {
+          // Jika kategori kosong, refresh tabel dengan semua data
+          refreshStockTable();
+        }
+      });
     });
 
     function refreshStockTable() {
@@ -584,27 +638,23 @@
       });
     };
 
-    // function filterByCategory(category) {
-    //   $.ajax({
-    //     url: '/products/select-by-category/' + category,
-    //     type: 'GET',
-    //     headers: {
-    //       'X-Requested-With': 'XMLHttpRequest'
-    //     },
-    //     success: function(response) {
-    //       if (response.success) {
-    //         $('#product-table-body').html(response.html);
-    //         $('#pagination-container').html(response.pagination);
-    //       } else {
-    //         alert('Gagal memfilter produk berdasarkan kategori.');
-    //       }
-    //     },
-    //     error: function(xhr) {
-    //       console.error('Error filtering by category:', xhr);
-    //       alert('Gagal mengambil data kategori.');
-    //     }
-    //   });
-    // }
+    function filterByCategory(category) {
+      $.ajax({
+        url: '/products/select-by-category/' + category,
+        type: 'GET',
+        success: function(response) {
+          if (response.success) {
+
+          } else {
+            alert('Gagal memfilter produk berdasarkan kategori.');
+          }
+        },
+        error: function(xhr) {
+          console.error('Error filtering by category:', xhr);
+          alert('Gagal mengambil data kategori.');
+        }
+      });
+    }
 
     // function searchCategory(query) {
     //   $.ajax({

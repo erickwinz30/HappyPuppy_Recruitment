@@ -225,33 +225,23 @@ class ProductController extends Controller
   {
     try {
       $products = Product::where('category', $category)->latest()->paginate(10);
-      $productCategory = Product::select('category')
-        ->distinct()
-        ->get()
-        ->pluck('category');
+      // $productCategory = Product::select('category')
+      //   ->distinct()
+      //   ->get()
+      //   ->pluck('category');
 
-      Log::info('Products retrieved by category: ', ['category' => $category, 'count' => $products->count()]);
+      // Log::info('Products retrieved by category: ', ['category' => $category, 'count' => $products->count()]);
 
       if ($request->ajax()) {
         return response()->json([
           'success' => true,
-          'products' => $products->items(), // Ambil data produk saja
-          'pagination' => [
-            'current_page' => $products->currentPage(),
-            'last_page' => $products->lastPage(),
-            'per_page' => $products->perPage(),
-            'total' => $products->total(),
-            'from' => $products->firstItem(),
-            'to' => $products->lastItem(),
-          ],
-          'category' => $category
+          'products' => $products->items(), // Data produk
+          'pagination' => (string) $products->links(), // Pagination HTML
         ]);
       }
 
-      // Jika bukan AJAX request, return view biasa
       return view('index', [
         'products' => $products,
-        'productCategory' => $productCategory,
       ]);
     } catch (\Exception $e) {
       Log::error('Error showing category: ' . $e->getMessage());
