@@ -20,7 +20,7 @@ Route::middleware('auth')->group(function () {
   Route::get('/', [ProductController::class, 'index'])->name('home');
   Route::resource('products', ProductController::class);
 
-  Route::get('/products/{category}', [ProductController::class, 'searchCategory']);
+  Route::get('/products/search/{category}', [ProductController::class, 'searchCategory']);
   Route::get('/products/select-by-category/{category}', [ProductController::class, 'selectByCategory'])->name('products.category');
 });
 

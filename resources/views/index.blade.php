@@ -25,13 +25,19 @@
                   data-bs-target="#addNewStockModal">Baru</button>
               </div>
             </div>
-            <div class="d-flex justify-content-end align-items-center mb-3">
-              <select id="categoryFilter" class="form-select w-25">
-                <option value="">Semua Kategori</option>
-                <option value="Elektronik">Elektronik</option>
-                <option value="Buku">Buku</option>
-                <option value="Pakaian">Pakaian</option>
-              </select>
+            <div class="d-flex justify-content-end align-items-center">
+              <div class="d-flex justify-content-end align-items-center mb-3">
+                <select id="categoryFilter" class="form-select w-25">
+                  <option value="">Semua Kategori</option>
+                  <option value="Elektronik">Elektronik</option>
+                  <option value="Buku">Buku</option>
+                  <option value="Pakaian">Pakaian</option>
+                </select>
+              </div>
+              <div class="d-flex justify-content-end align-items-center mb-3">
+                <input type="text" id="searchInput" class="form-control" placeholder="Cari produk..."
+                  aria-label="Search">
+              </div>
             </div>
 
             <!-- Table with stripped rows -->
@@ -430,6 +436,69 @@
           // Jika kategori kosong, refresh tabel dengan semua data
           refreshStockTable();
         }
+      });
+
+      $('#searchInput').on('input', function() {
+        var category = $(this).val().toLowerCase();
+
+        if (category) {
+          $.ajax({
+            url: '/products/search/' + category, // Route untuk fetching data
+            type: 'GET',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+              if (response.success) {
+                // Kosongkan tabel
+                $('#stock-table tbody').empty();
+
+                // Bangun isi tabel dari data produk
+                response.products.forEach(function(product, index) {
+                  var row = `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${product.name}</td>
+                  <td>${product.category}</td>
+                  <td>Rp. ${parseFloat(product.price).toFixed(2)}</td>
+                  <td>${product.stock}</td>
+                  <td>${new Date(product.created_at).toLocaleString()}</td>
+                  <td>
+                    <button type="button" class="btn btn-warning" id="btn-edit" data-edit-id="${product.id}" data-bs-toggle="modal" data-bs-target="#editStockModal">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <form action="/products/${product.id}" method="POST" class="d-inline delete-form" id="deleteForm${product.id}">
+                      @method('DELETE')
+                      @csrf
+                      <button type="button" class="btn btn-danger" onclick="deleteConfirmation('${product.id}')">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              `;
+                  $('#stock-table tbody').append(row);
+                });
+
+                // Update pagination
+                $('#pagination-container').html(response.pagination);
+              } else {
+                alert('Gagal memfilter produk berdasarkan kategori.');
+              }
+            },
+            error: function(xhr) {
+              console.error('Error filtering by category:', xhr);
+              alert('Gagal mengambil data kategori.');
+            }
+          });
+        } else {
+          refreshStockTable();
+        }
+
+        // // Filter tabel berdasarkan input pencarian
+        // $('#stock-table tbody tr').filter(function() {
+        //   $(this).toggle($(this).text().toLowerCase().indexOf(query) > -1);
+        // });
       });
     });
 

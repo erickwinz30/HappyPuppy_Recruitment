@@ -199,15 +199,10 @@ class ProductController extends Controller
       Log::info('Products retrieved by search: ', ['search' => $category, 'count' => $products->count()]);
 
       if ($request->ajax()) {
-        // Render partial view untuk tabel
-        $tableHtml = view('partials.product-table', [
-          'products' => $products
-        ])->render();
-
         return response()->json([
           'success' => true,
-          'html' => $tableHtml,
-          'pagination' => $products->links()->render(),
+          'products' => $products->items(), // Data produk
+          'pagination' => (string) $products->links(), // Pagination HTML
         ]);
       }
 
